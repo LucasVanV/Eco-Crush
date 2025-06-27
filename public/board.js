@@ -184,68 +184,45 @@ class Board {
     }
 
     checkAndRemoveMatches() {
-        // Utilise ta fonction pour trouver les groupes de matches
         const matchGroups = this.findMatchGroups();
+        if (matchGroups.length === 0) return;
 
-        if (matchGroups.length > 0) {
-            // Combo = nombre de groupes trouvés
-            const combo = matchGroups.length;
-            // Aplatit tous les groupes en un seul tableau de positions uniques
-            const allMatches = matchGroups.flat();
-            const unique = allMatches.filter(
-                (v, i, a) => a.findIndex(t => t.row === v.row && t.col === v.col) === i
-            );
+        const combo = matchGroups.length;
+        const allMatches = matchGroups.flat();
+        const unique = allMatches.filter(
+            (v, i, a) => a.findIndex(t => t.row === v.row && t.col === v.col) === i
+        );
 
-            // Ajoute la classe matching pour l'aura
-            const boardDiv = document.getElementById('game-board');
-            const candies = boardDiv.querySelectorAll('.candy');
-            unique.forEach(pos => {
-                const idx = pos.row * this.cols + pos.col;
-                candies[idx].classList.add('matching');
-            });
+        // Ajoute la classe matching pour l'aura
+        const boardDiv = document.getElementById('game-board');
+        const candies = boardDiv.querySelectorAll('.candy');
+        unique.forEach(pos => {
+            const idx = pos.row * this.cols + pos.col;
+            candies[idx].classList.add('matching');
+        });
 
-            // Joue le son de validation
-            if (this.validationSound) {
-                this.validationSound.currentTime = 0;
-                this.validationSound.play();
-            }
-
-            setTimeout(() => {
-                for (const pos of unique) {
-                    this.board[pos.row][pos.col] = null;
-                }
-                // Score avec combo
-                this.addScore(unique.length * combo);
-
-                // Affiche le combo si > 1
-                if (combo > 1) this.showCombo(combo);
-
-                this.updateBoardDisplay();
-                this.collapseBoard();
-                this.updateBoardDisplay();
-                this.checkAndRemoveMatches();
-            }, 400);
+        // Joue le son de validation
+        if (this.validationSound) {
+            this.validationSound.currentTime = 0;
+            this.validationSound.play();
         }
-        // Supposons que tu as un tableau de groupes de matches :
-        // ex: let matchGroups = [ [ {row, col}, ... ], [ {row, col}, ... ] ]
-        // (à adapter selon ta logique)
 
-        // À SUPPRIMER OU COMMENTER dans checkAndRemoveMatches :
-        /*
-        let matchGroups = this.findMatchGroups(); // À adapter selon ton code
-        if (matchGroups.length > 0) {
-            let combo = matchGroups.length;
-            let totalMatched = matchGroups.flat().length;
-            let points = totalMatched * 10 * combo; // 10 pts par case, multiplié par le combo
-
-            this.addScore(points);
+        setTimeout(() => {
+            for (const pos of unique) {
+                this.board[pos.row][pos.col] = null;
+            }
+            // Score avec combo
+            this.addScore(unique.length * combo);
 
             // Affiche le combo si > 1
             if (combo > 1) this.showCombo(combo);
 
-            // ...le reste de ta logique de suppression...
-        }
-        */
+            this.updateBoardDisplay();
+            this.collapseBoard();
+            this.updateBoardDisplay();
+            // Relance la détection après la chute
+            setTimeout(() => this.checkAndRemoveMatches(), 10);
+        }, 400);
     }
 
     addScore(n) {
@@ -285,8 +262,15 @@ class Board {
             }
             // Remplit les trous en haut
             for (let i = 0; i < empty.length; i++) {
-                this.board[empty[i]][col] = this.getRandomCandy();
-            }
+    let candy;
+    do {
+        candy = this.getRandomCandy();
+    } while (
+        (empty[i] >= 2 && this.board[empty[i] - 1][col] === candy && this.board[empty[i] - 2][col] === candy) ||
+        (col >= 2 && this.board[empty[i]][col - 1] === candy && this.board[empty[i]][col - 2] === candy)
+    );
+    this.board[empty[i]][col] = candy;
+}
         }
 
         // Après l'animation, reset l'affichage
