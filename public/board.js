@@ -183,52 +183,17 @@ class Board {
     }
 
     checkAndRemoveMatches() {
-        const matches = [];
-        // Cherche les lignes
-        for (let row = 0; row < this.rows; row++) {
-            let count = 1;
-            for (let col = 1; col < this.cols; col++) {
-                if (this.board[row][col] === this.board[row][col-1]) {
-                    count++;
-                } else {
-                    if (count >= 3) {
-                        for (let k = 0; k < count; k++) {
-                            matches.push({row, col: col-1-k});
-                        }
-                    }
-                    count = 1;
-                }
-            }
-            if (count >= 3) {
-                for (let k = 0; k < count; k++) {
-                    matches.push({row, col: this.cols-1-k});
-                }
-            }
-        }
-        // Cherche les colonnes
-        for (let col = 0; col < this.cols; col++) {
-            let count = 1;
-            for (let row = 1; row < this.rows; row++) {
-                if (this.board[row][col] === this.board[row-1][col]) {
-                    count++;
-                } else {
-                    if (count >= 3) {
-                        for (let k = 0; k < count; k++) {
-                            matches.push({row: row-1-k, col});
-                        }
-                    }
-                    count = 1;
-                }
-            }
-            if (count >= 3) {
-                for (let k = 0; k < count; k++) {
-                    matches.push({row: this.rows-1-k, col});
-                }
-            }
-        }
-        if (matches.length > 0) {
-            // Supprime les doublons
-            const unique = matches.filter((v,i,a)=>a.findIndex(t=>(t.row===v.row&&t.col===v.col))===i);
+        // Utilise ta fonction pour trouver les groupes de matches
+        const matchGroups = this.findMatchGroups();
+
+        if (matchGroups.length > 0) {
+            // Combo = nombre de groupes trouvés
+            const combo = matchGroups.length;
+            // Aplatit tous les groupes en un seul tableau de positions uniques
+            const allMatches = matchGroups.flat();
+            const unique = allMatches.filter(
+                (v, i, a) => a.findIndex(t => t.row === v.row && t.col === v.col) === i
+            );
 
             // Ajoute la classe matching pour l'aura
             const boardDiv = document.getElementById('game-board');
@@ -242,7 +207,11 @@ class Board {
                 for (const pos of unique) {
                     this.board[pos.row][pos.col] = null;
                 }
-                this.addScore(unique.length);
+                // Score avec combo
+                this.addScore(unique.length * combo);
+
+                // Affiche le combo si > 1
+                if (combo > 1) this.showCombo(combo);
 
                 this.updateBoardDisplay();
                 this.collapseBoard();
@@ -359,52 +328,17 @@ class Board {
     }
 
     checkAndRemoveMatches() {
-        const matches = [];
-        // Cherche les lignes
-        for (let row = 0; row < this.rows; row++) {
-            let count = 1;
-            for (let col = 1; col < this.cols; col++) {
-                if (this.board[row][col] === this.board[row][col-1]) {
-                    count++;
-                } else {
-                    if (count >= 3) {
-                        for (let k = 0; k < count; k++) {
-                            matches.push({row, col: col-1-k});
-                        }
-                    }
-                    count = 1;
-                }
-            }
-            if (count >= 3) {
-                for (let k = 0; k < count; k++) {
-                    matches.push({row, col: this.cols-1-k});
-                }
-            }
-        }
-        // Cherche les colonnes
-        for (let col = 0; col < this.cols; col++) {
-            let count = 1;
-            for (let row = 1; row < this.rows; row++) {
-                if (this.board[row][col] === this.board[row-1][col]) {
-                    count++;
-                } else {
-                    if (count >= 3) {
-                        for (let k = 0; k < count; k++) {
-                            matches.push({row: row-1-k, col});
-                        }
-                    }
-                    count = 1;
-                }
-            }
-            if (count >= 3) {
-                for (let k = 0; k < count; k++) {
-                    matches.push({row: this.rows-1-k, col});
-                }
-            }
-        }
-        if (matches.length > 0) {
-            // Supprime les doublons
-            const unique = matches.filter((v,i,a)=>a.findIndex(t=>(t.row===v.row&&t.col===v.col))===i);
+        // Utilise ta fonction pour trouver les groupes de matches
+        const matchGroups = this.findMatchGroups();
+
+        if (matchGroups.length > 0) {
+            // Combo = nombre de groupes trouvés
+            const combo = matchGroups.length;
+            // Aplatit tous les groupes en un seul tableau de positions uniques
+            const allMatches = matchGroups.flat();
+            const unique = allMatches.filter(
+                (v, i, a) => a.findIndex(t => t.row === v.row && t.col === v.col) === i
+            );
 
             // Ajoute la classe matching pour l'aura
             const boardDiv = document.getElementById('game-board');
@@ -418,7 +352,11 @@ class Board {
                 for (const pos of unique) {
                     this.board[pos.row][pos.col] = null;
                 }
-                this.addScore(unique.length);
+                // Score avec combo
+                this.addScore(unique.length * combo);
+
+                // Affiche le combo si > 1
+                if (combo > 1) this.showCombo(combo);
 
                 this.updateBoardDisplay();
                 this.collapseBoard();
@@ -448,45 +386,142 @@ class Board {
         */
     }
 
-    findMatchGroups() {
-        const visited = new Set();
-        const matches = [];
+    addScore(n) {
+        const scoreDiv = document.getElementById('score');
+        let score = parseInt(scoreDiv.textContent.replace(/\D/g, '')) || 0;
+        score += n * 10;
+        scoreDiv.textContent = 'Score: ' + score;
+    }
 
-        const addMatch = (row, col) => {
-            if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) return;
-            const key = `${row},${col}`;
-            if (visited.has(key)) return;
-            visited.add(key);
-            matches[matches.length - 1].push({ row, col });
-        };
+    collapseBoard() {
+        // On va animer la chute des bonbons
+        const boardDiv = document.getElementById('game-board');
+        const candies = boardDiv.querySelectorAll('.candy');
+        const cellSize = candies[0]?.offsetWidth || 40; // largeur d'une case
 
-        for (let row = 0; row < this.rows; row++) {
-            for (let col = 0; col < this.cols; col++) {
-                if (visited.has(`${row},${col}`)) continue;
-                const candyType = this.board[row][col];
-                if (!candyType) continue;
-
-                matches.push([{ row, col }]);
-                // Check right
-                for (let c = col + 1; c < this.cols; c++) {
-                    if (this.board[row][c] === candyType) {
-                        addMatch(row, c);
-                    } else {
-                        break;
+        let moves = [];
+        for (let col = 0; col < this.cols; col++) {
+            let empty = [];
+            for (let row = this.rows - 1; row >= 0; row--) {
+                if (this.board[row][col] === null) {
+                    empty.push(row);
+                } else if (empty.length > 0) {
+                    const targetRow = empty.shift();
+                    // Animation: trouve l'élément DOM correspondant
+                    const idx = row * this.cols + col;
+                    const candyEl = candies[idx];
+                    if (candyEl) {
+                        candyEl.classList.add('falling');
+                        candyEl.style.transform = `translateY(${(targetRow - row) * cellSize}px)`;
+                        moves.push({el: candyEl, from: row, to: targetRow, col});
                     }
+                    // Déplace dans le tableau
+                    this.board[targetRow][col] = this.board[row][col];
+                    this.board[row][col] = null;
+                    empty.push(row);
                 }
-                // Check down
-                for (let r = row + 1; r < this.rows; r++) {
-                    if (this.board[r][col] === candyType) {
-                        addMatch(r, col);
-                    } else {
-                        break;
-                    }
-                }
+            }
+            // Remplit les trous en haut
+            for (let i = 0; i < empty.length; i++) {
+                this.board[empty[i]][col] = this.getRandomCandy();
             }
         }
 
-        return matches.filter(group => group.length >= 3);
+        // Après l'animation, reset l'affichage
+        setTimeout(() => {
+            // Nettoie les styles
+            moves.forEach(({el}) => {
+                el.classList.remove('falling');
+                el.style.transform = '';
+            });
+            this.updateBoardDisplay();
+            this.checkAndRemoveMatches();
+        }, 800); // même durée que la transition CSS
+    }
+
+    getImage(type) {
+        switch(type) {
+            case 'plastique': return '<img src="imgs/sac plastique.png" alt="plastique" class="candy-img">';
+            case 'papier':    return '<img src="imgs/papier.png" alt="papier" class="candy-img">';
+            case 'verre':     return '<img src="imgs/gobelet.png" alt="verre" class="candy-img">';
+            case 'metal':     return '<img src="imgs/concerve.png" alt="metal" class="candy-img">';
+            case 'compost':   return '<img src="imgs/banane.png" alt="compost" class="candy-img">';
+            default:          return '';
+        }
+    }
+
+    startTimer() {
+        this.timeLeft = 60;
+        const timerDiv = document.getElementById('timer');
+        timerDiv.textContent = 'Temps : 60s';
+        if (this.timerInterval) clearInterval(this.timerInterval);
+        this.gameOver = false;
+        this.timerInterval = setInterval(() => {
+            this.timeLeft--;
+            timerDiv.textContent = 'Temps : ' + this.timeLeft + 's';
+            if (this.timeLeft <= 0) {
+                clearInterval(this.timerInterval);
+                timerDiv.textContent = 'Temps écoulé !';
+                this.gameOver = true;
+                const scoreDiv = document.getElementById('score');
+                const score = parseInt(scoreDiv.textContent.replace(/\D/g, '')) || 0;
+                if (window.saveScore) window.saveScore(score);
+                console.log('Score validé :', score);
+
+            }
+        }, 1000);
+    }
+
+    findMatchGroups() {
+        const groups = [];
+
+        // Horizontal
+        for (let row = 0; row < this.rows; row++) {
+            let start = 0;
+            while (start < this.cols) {
+                let end = start + 1;
+                while (
+                    end < this.cols &&
+                    this.board[row][start] &&
+                    this.board[row][start] === this.board[row][end]
+                ) {
+                    end++;
+                }
+                if (end - start >= 3) {
+                    const group = [];
+                    for (let col = start; col < end; col++) {
+                        group.push({ row, col });
+                    }
+                    groups.push(group);
+                }
+                start = end;
+            }
+        }
+
+        // Vertical
+        for (let col = 0; col < this.cols; col++) {
+            let start = 0;
+            while (start < this.rows) {
+                let end = start + 1;
+                while (
+                    end < this.rows &&
+                    this.board[start][col] &&
+                    this.board[start][col] === this.board[end][col]
+                ) {
+                    end++;
+                }
+                if (end - start >= 3) {
+                    const group = [];
+                    for (let row = start; row < end; row++) {
+                        group.push({ row, col });
+                    }
+                    groups.push(group);
+                }
+                start = end;
+            }
+        }
+
+        return groups;
     }
 
     showCombo(combo) {
