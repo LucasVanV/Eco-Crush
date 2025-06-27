@@ -6,8 +6,6 @@ body {
 }
 
 #game-container {
-    max-width: 600px;
-    margin: 40px auto;
     background: #fff;
     border-radius: 16px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.12);
@@ -28,6 +26,7 @@ h1 {
 }
 
 #game-board {
+    margin-top: 10px;
     display: grid;
     grid-template-columns: repeat(8, 56px);
     grid-template-rows: repeat(8, 56px);
@@ -65,6 +64,11 @@ h1 {
     cursor: pointer;
     transition: background 0.2s;
     margin-top: 8px;
+}
+
+.logo{
+    width: 100px;
+    height: auto;
 }
 
 #start-button:hover {
@@ -117,4 +121,66 @@ h1 {
     0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.7);}
     60%  { opacity: 1; transform: translate(-50%, -50%) scale(1.2);}
     100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5);}
+}
+
+/* Ajoute ceci dans styles.css */
+#main-container {
+    display: flex;
+    align-items: flex-start;
+    gap: 40px;
+    justify-content: center;
+    width: 100%;
+    margin-top: 30px;
+}
+
+#leaderboard {
+    min-width: 180px;
+    background: #f7f7f7;
+    border-radius: 10px;
+    border: 2px solid #bbb;
+    padding: 16px 20px;
+    box-shadow: 0 2px 8px #0001;
+}
+
+#leaderboard h3 {
+    margin-top: 0;
+    text-align: center;
+}
+
+#leaderboard-list {
+    padding-left: 18px;
+    margin: 0;
+}
+
+.candy-img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+    display: block;
+    margin: auto;
+}
+
+.combo-banner {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #ffe066;
+    color: #d72660;
+    font-size: 2em;
+    font-weight: bold;
+    padding: 12px 32px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px #0002;
+    z-index: 1000;
+    animation: combo-pop 1.2s;
+}
+
+@keyframes combo-pop {
+    0% { opacity: 0; transform: translateX(-50%) scale(0.7);}
+    20% { opacity: 1; transform: translateX(-50%) scale(1.1);}
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(-50%) scale(1);}
 }

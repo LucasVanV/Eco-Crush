@@ -3,7 +3,7 @@ class Board {
         this.rows = rows;
         this.cols = cols;
         this.board = [];
-        this.candyTypes = ['plastique', 'papier', 'verre', 'metal', 'compost', 'dechet'];
+        this.candyTypes = ['plastique', 'papier', 'verre', 'metal', 'compost'];
         this.selected = [];
         this.gameOver = false; // <-- AJOUTE CETTE LIGNE
         this.createBoard();
@@ -29,7 +29,7 @@ class Board {
                 cell.className = 'candy ' + candy;
                 cell.dataset.row = row;
                 cell.dataset.col = col;
-                cell.textContent = this.getEmoji(candy); // <-- AJOUTE CETTE LIGNE
+                cell.innerHTML = this.getImage(candy); // <-- AJOUTE CETTE LIGNE
 
                 // Listener pour le swap
                 cell.addEventListener('click', (e) => this.handleCandyClick(e, row, col));
@@ -175,7 +175,7 @@ class Board {
                 candies[i].className = 'candy ' + this.board[row][col];
                 candies[i].dataset.row = row;
                 candies[i].dataset.col = col;
-                candies[i].textContent = this.getEmoji(this.board[row][col]);
+                candies[i].innerHTML = this.getImage(this.board[row][col]);
                 // Ne plus ajouter la classe 'falling'
                 i++;
             }
@@ -238,23 +238,38 @@ class Board {
                 candies[idx].classList.add('matching');
             });
 
-            // Laisse le temps à l'aura de s'afficher
             setTimeout(() => {
-                // Retire les bonbons matchés
                 for (const pos of unique) {
                     this.board[pos.row][pos.col] = null;
                 }
                 this.addScore(unique.length);
 
-                // Mets à jour l'affichage pour montrer les bonbons supprimés
                 this.updateBoardDisplay();
-
-                // Lance la chute après la suppression
                 this.collapseBoard();
                 this.updateBoardDisplay();
                 this.checkAndRemoveMatches();
-            }, 400); // même durée que l'animation aura-pop
+            }, 400);
         }
+        // Supposons que tu as un tableau de groupes de matches :
+        // ex: let matchGroups = [ [ {row, col}, ... ], [ {row, col}, ... ] ]
+        // (à adapter selon ta logique)
+
+        // À SUPPRIMER OU COMMENTER dans checkAndRemoveMatches :
+        /*
+        let matchGroups = this.findMatchGroups(); // À adapter selon ton code
+        if (matchGroups.length > 0) {
+            let combo = matchGroups.length;
+            let totalMatched = matchGroups.flat().length;
+            let points = totalMatched * 10 * combo; // 10 pts par case, multiplié par le combo
+
+            this.addScore(points);
+
+            // Affiche le combo si > 1
+            if (combo > 1) this.showCombo(combo);
+
+            // ...le reste de ta logique de suppression...
+        }
+        */
     }
 
     addScore(n) {
@@ -310,15 +325,14 @@ class Board {
         }, 800); // même durée que la transition CSS
     }
 
-    getEmoji(type) {
+    getImage(type) {
         switch(type) {
-            case 'plastique': return '🛍️';   // sac plastique
-            case 'papier':    return '📦';   // carton/papier
-            case 'verre':     return '🍶';   // bouteille en verre
-            case 'metal':     return '🥫';   // canette
-            case 'compost':   return '🍂';   // feuille/compost
-            case 'dechet':    return '🚮';   // déchet non recyclable
-            default:          return ' ';
+            case 'plastique': return '<img src="imgs/sac plastique.png" alt="plastique" class="candy-img">';
+            case 'papier':    return '<img src="imgs/papier.png" alt="papier" class="candy-img">';
+            case 'verre':     return '<img src="imgs/gobelet.png" alt="verre" class="candy-img">';
+            case 'metal':     return '<img src="imgs/concerve.png" alt="metal" class="candy-img">';
+            case 'compost':   return '<img src="imgs/banane.png" alt="compost" class="candy-img">';
+            default:          return '';
         }
     }
 
@@ -327,16 +341,160 @@ class Board {
         const timerDiv = document.getElementById('timer');
         timerDiv.textContent = 'Temps : 60s';
         if (this.timerInterval) clearInterval(this.timerInterval);
-        this.gameOver = false; // <-- reset au début
+        this.gameOver = false;
         this.timerInterval = setInterval(() => {
             this.timeLeft--;
             timerDiv.textContent = 'Temps : ' + this.timeLeft + 's';
             if (this.timeLeft <= 0) {
                 clearInterval(this.timerInterval);
                 timerDiv.textContent = 'Temps écoulé !';
-                this.gameOver = true; // <-- AJOUTE CETTE LIGNE
+                this.gameOver = true;
+                const scoreDiv = document.getElementById('score');
+                const score = parseInt(scoreDiv.textContent.replace(/\D/g, '')) || 0;
+                if (window.saveScore) window.saveScore(score);
+                console.log('Score validé :', score);
+
             }
         }, 1000);
+    }
+
+    checkAndRemoveMatches() {
+        const matches = [];
+        // Cherche les lignes
+        for (let row = 0; row < this.rows; row++) {
+            let count = 1;
+            for (let col = 1; col < this.cols; col++) {
+                if (this.board[row][col] === this.board[row][col-1]) {
+                    count++;
+                } else {
+                    if (count >= 3) {
+                        for (let k = 0; k < count; k++) {
+                            matches.push({row, col: col-1-k});
+                        }
+                    }
+                    count = 1;
+                }
+            }
+            if (count >= 3) {
+                for (let k = 0; k < count; k++) {
+                    matches.push({row, col: this.cols-1-k});
+                }
+            }
+        }
+        // Cherche les colonnes
+        for (let col = 0; col < this.cols; col++) {
+            let count = 1;
+            for (let row = 1; row < this.rows; row++) {
+                if (this.board[row][col] === this.board[row-1][col]) {
+                    count++;
+                } else {
+                    if (count >= 3) {
+                        for (let k = 0; k < count; k++) {
+                            matches.push({row: row-1-k, col});
+                        }
+                    }
+                    count = 1;
+                }
+            }
+            if (count >= 3) {
+                for (let k = 0; k < count; k++) {
+                    matches.push({row: this.rows-1-k, col});
+                }
+            }
+        }
+        if (matches.length > 0) {
+            // Supprime les doublons
+            const unique = matches.filter((v,i,a)=>a.findIndex(t=>(t.row===v.row&&t.col===v.col))===i);
+
+            // Ajoute la classe matching pour l'aura
+            const boardDiv = document.getElementById('game-board');
+            const candies = boardDiv.querySelectorAll('.candy');
+            unique.forEach(pos => {
+                const idx = pos.row * this.cols + pos.col;
+                candies[idx].classList.add('matching');
+            });
+
+            setTimeout(() => {
+                for (const pos of unique) {
+                    this.board[pos.row][pos.col] = null;
+                }
+                this.addScore(unique.length);
+
+                this.updateBoardDisplay();
+                this.collapseBoard();
+                this.updateBoardDisplay();
+                this.checkAndRemoveMatches();
+            }, 400);
+        }
+        // Supposons que tu as un tableau de groupes de matches :
+        // ex: let matchGroups = [ [ {row, col}, ... ], [ {row, col}, ... ] ]
+        // (à adapter selon ta logique)
+
+        // À SUPPRIMER OU COMMENTER dans checkAndRemoveMatches :
+        /*
+        let matchGroups = this.findMatchGroups(); // À adapter selon ton code
+        if (matchGroups.length > 0) {
+            let combo = matchGroups.length;
+            let totalMatched = matchGroups.flat().length;
+            let points = totalMatched * 10 * combo; // 10 pts par case, multiplié par le combo
+
+            this.addScore(points);
+
+            // Affiche le combo si > 1
+            if (combo > 1) this.showCombo(combo);
+
+            // ...le reste de ta logique de suppression...
+        }
+        */
+    }
+
+    findMatchGroups() {
+        const visited = new Set();
+        const matches = [];
+
+        const addMatch = (row, col) => {
+            if (row < 0 || row >= this.rows || col < 0 || col >= this.cols) return;
+            const key = `${row},${col}`;
+            if (visited.has(key)) return;
+            visited.add(key);
+            matches[matches.length - 1].push({ row, col });
+        };
+
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                if (visited.has(`${row},${col}`)) continue;
+                const candyType = this.board[row][col];
+                if (!candyType) continue;
+
+                matches.push([{ row, col }]);
+                // Check right
+                for (let c = col + 1; c < this.cols; c++) {
+                    if (this.board[row][c] === candyType) {
+                        addMatch(row, c);
+                    } else {
+                        break;
+                    }
+                }
+                // Check down
+                for (let r = row + 1; r < this.rows; r++) {
+                    if (this.board[r][col] === candyType) {
+                        addMatch(r, col);
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return matches.filter(group => group.length >= 3);
+    }
+
+    showCombo(combo) {
+        const comboDiv = document.createElement('div');
+        comboDiv.className = 'combo-banner';
+        comboDiv.textContent = `Combo x${combo} !`;
+        document.body.appendChild(comboDiv);
+        setTimeout(() => comboDiv.remove(), 1200);
     }
 }
 

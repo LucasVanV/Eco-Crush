@@ -38,4 +38,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (startBtn) {
         startBtn.addEventListener('click', init);
     }
+
 });
+
+window.saveScore = function(score) {
+    let scores = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+    scores.push({ score, date: new Date().toLocaleString() });
+    scores = scores.sort((a, b) => b.score - a.score).slice(0, 3);
+    localStorage.setItem('leaderboard', JSON.stringify(scores));
+
+    // Met à jour les <li> existants
+    const list = document.getElementById('leaderboard-list');
+    const items = list.querySelectorAll('li');
+    for (let i = 0; i < items.length; i++) {
+        const medalSpan = items[i].querySelector('span');
+        if (scores[i] && scores[i].score !== 0) {
+            items[i].innerHTML = medalSpan.outerHTML + ` ${scores[i].score} pts `;
+        } else {
+            items[i].innerHTML = medalSpan.outerHTML;
+        }
+    }
+};

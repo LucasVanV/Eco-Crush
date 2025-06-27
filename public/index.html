@@ -7,12 +7,22 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="game-container">
-        <h1>Eco Crush</h1>
+    <div id="main-container">
+      <div id="game-container">
+        <img src="imgs/ecoCrush.png" alt="logo" class="logo">
         <div id="score">Score: 0</div>
         <div id="timer">Temps : 60s</div>
-        <div id="game-board"></div>
         <button id="start-button">Jouer</button>
+        <div id="game-board"></div>
+      </div>
+      <div id="leaderboard">
+        <h3>Leaderboard</h3>
+        <ol id="leaderboard-list">
+          <li><span>🥇</span></li>
+          <li><span>🥈</span></li>
+          <li><span>🥉</span></li>
+        </ol>
+      </div>
     </div>
     <script type="module" src="../index.js"></script>
 </body>
