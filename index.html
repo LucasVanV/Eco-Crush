@@ -125,6 +125,7 @@
             margin-top: 30px;
         }
         #leaderboard {
+            margin-bottom: 24px;
             min-width: 180px;
             background: #f7f7f7;
             border-radius: 10px;
@@ -170,6 +171,45 @@
             80% { opacity: 1; }
             100% { opacity: 0; transform: translateX(-50%) scale(1);}
         }
+        @media (max-width: 900px) {
+    body {
+        padding-left: 12px;
+        padding-right: 12px;
+        box-sizing: border-box;
+    }
+    #main-container {
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        /* padding-left/padding-right ici n'affecte que le conteneur flex, pas le jeu */
+    }
+    #game-container {
+        width: 100vw;
+        min-width: unset;
+        box-sizing: border-box;
+        padding: 24px 0 16px 0;
+    }
+    #game-board {
+        grid-template-columns: repeat(8, minmax(32px, 1fr));
+        grid-template-rows: repeat(8, minmax(32px, 1fr));
+        gap: 4px;
+        max-width: 98vw;
+        margin: 0 auto 16px auto;
+    }
+    .candy {
+        width: 32px;
+        height: 32px;
+        font-size: 1.2em;
+    }
+    .logo {
+        width: 60px;
+    }
+    #leaderboard {
+        min-width: unset;
+        width: 95vw;
+        margin: 0 auto 16px auto;
+    }
+}
     </style>
 </head>
 <body>
