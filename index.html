@@ -181,10 +181,10 @@
         flex-direction: column;
         align-items: center;
         gap: 16px;
-        /* padding-left/padding-right ici n'affecte que le conteneur flex, pas le jeu */
+        width: 95vw;
     }
     #game-container {
-        width: 100vw;
+        width: 95vw;
         min-width: unset;
         box-sizing: border-box;
         padding: 24px 0 16px 0;
@@ -194,7 +194,7 @@
         grid-template-rows: repeat(8, minmax(32px, 1fr));
         gap: 4px;
         max-width: 98vw;
-        margin: 0 auto 16px auto;
+        margin: 10px auto 16px auto;
     }
     .candy {
         width: 32px;
@@ -206,8 +206,7 @@
     }
     #leaderboard {
         min-width: unset;
-        width: 95vw;
-        margin: 0 auto 16px auto;
+        width: 90vw;
     }
 }
     </style>
